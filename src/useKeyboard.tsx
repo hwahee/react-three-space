@@ -15,10 +15,6 @@ function useKeyboard() {
         }
     }, [])
 
-    useEffect(() => {
-        console.log(`keystat: `, keyStat)
-    }, [keyStat])
-
     const attachWindowKeyboardInput = () => {
         if (window.keyboardInputEnabled) return;
         window.keyboardInputEnabled = true;

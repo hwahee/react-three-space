@@ -19,15 +19,17 @@ const Player = (props: { position: number[], speed?: number }) => {
 
 	useEffect(() => { }, [keyStat])
 	useFrame((state, delta) => {
+		const rotDelta = (keyStat['q'] ? 1 : 0) + (keyStat['e'] ? -1 : 0)
+		const rot = ref.current.rotation
+		ref.current.rotation.set(rot.x, rot.y + rotDelta * delta, rot.z)
+
 		const frontVec = (keyStat['w'] ? 1 : 0) + (keyStat['s'] ? -1 : 0)
 		const sideVec = (keyStat['a'] ? 1 : 0) + (keyStat['d'] ? -1 : 0)
-		const rotDelta = (keyStat['q'] ? 1 : 0) + (keyStat['e'] ? -1 : 0)
+		const moveVec = new Vector3(sideVec, 0, frontVec).normalize().applyEuler(rot).multiplyScalar(speed)
 
 		const posnow = ref.current.position
-		ref.current.position.set(posnow.x + sideVec * delta * speed, posnow.y, posnow.z + frontVec * delta * speed)
+		ref.current.position.set(posnow.x + moveVec.x * delta, posnow.y, posnow.z + moveVec.z * delta)
 
-		const rot=ref.current.rotation
-		ref.current.rotation.set(rot.x, rot.y+rotDelta * delta, rot.z)
 	})
 
 	useEffect(() => {
