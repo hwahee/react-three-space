@@ -20,31 +20,37 @@ function useKeyboard() {
         window.keyboardInputEnabled = true;
         window.addEventListener('keydown', keydownEvent)
         window.addEventListener('keyup', keyupEvent)
+        window.addEventListener('blur', blurEvent)
     }
     const detachWindowKeyboardInput = () => {
         if (!window.keyboardInputEnabled) return;
         window.keyboardInputEnabled = false;
         window.removeEventListener('keydown', keydownEvent)
         window.removeEventListener('keyup', keyupEvent)
+        window.removeEventListener('blur', blurEvent)
     }
     const keydownEvent = (e: KeyboardEvent) => {
         if (e.repeat) return
-        if (keyStat[e.key]) return
+        if (keyStat[e.key.toLowerCase()]) return
 
         setKeyStat(k => {
             const ret = { ...k }
-            ret[e.key] = true
+            ret[e.key.toLowerCase()] = true
             return ret
         })
     }
     const keyupEvent = (e: KeyboardEvent) => {
         setKeyStat(k => {
             const ret = { ...k }
-            delete ret[e.key]
+            delete ret[e.key.toLowerCase()]
             return ret
         })
     }
+    const blurEvent = () => {
+        setKeyStat(k => ({}))
+    }
 
+    
     return keyStat
 }
 export { useKeyboard }
