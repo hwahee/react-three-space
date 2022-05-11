@@ -1,29 +1,32 @@
-import { Box, OrbitControls, PerspectiveCamera, Sphere, useGLTF } from "@react-three/drei"
-import { PrimitiveProps, useFrame } from "@react-three/fiber"
+import { PerspectiveCamera, Sphere, useAnimations, useGLTF } from "@react-three/drei"
+import { useFrame } from "@react-three/fiber"
 import React, { forwardRef, useEffect, useRef } from "react"
 import { Euler, Vector3 } from "three"
-import { useKeyboard } from "../useKeyboard"
+import { KeyStat, useKeyboard } from "../useKeyboard"
 import { PerspectiveCamera as PerspectiveCameraImpl } from 'three';
-import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-
+import { AnimationController } from "./AnimationController"
 
 const Model = forwardRef((props: Object, ref) => {
     const glb = useGLTF('https://raw.githubusercontent.com/hwahee/myResource/master/Bee.glb')
+    const innerRef = useRef<THREE.Group>(null!)
     return (
         <Sphere ref={ref}>
             <meshBasicMaterial color={'hotpink'} transparent opacity={0} />
-            <primitive object={glb.scene} scale={[0.125, 0.125, 0.125]} />
+            <group ref={innerRef}>
+                <primitive object={glb.scene} scale={[0.125, 0.125, 0.125]} />
+            </group>
+            <AnimationController modelRef={innerRef} animations={glb.animations} />
         </Sphere>
     )
 })
+useGLTF.preload('https://raw.githubusercontent.com/hwahee/myResource/master/Bee.glb')
 
 const Player = (props: { position: number[], speed?: number }) => {
     const { position, speed = 1 } = props
+    const keyStat: KeyStat = useKeyboard()
     const ref = useRef<THREE.Mesh>(null!)
     const modelRef = useRef<THREE.Mesh>(null!)
     const camRef = useRef<PerspectiveCameraImpl>(null!)
-    const ctrlRef = useRef<OrbitControlsImpl>(null!)
-    const keyStat = useKeyboard()
 
     useEffect(() => {
         ref.current.position.set(position[0], position[1], position[2])

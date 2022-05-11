@@ -6,6 +6,8 @@ declare global {
     }
 }
 
+type KeyStat = {[key: string]: boolean}
+
 function useKeyboard() {
     const [keyStat, setKeyStat] = useState<{ [key: string]: boolean }>({})
     useEffect(() => {
@@ -48,9 +50,8 @@ function useKeyboard() {
     }
     const blurEvent = () => {
         setKeyStat(k => ({}))
-    }
-
-    
+    }   
     return keyStat
 }
+export type {KeyStat}
 export { useKeyboard }

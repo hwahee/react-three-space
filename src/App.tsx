@@ -5,13 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { Plane } from '@react-three/drei'
 import { AxisIndicator } from './components/AxisIndicator';
 import { Player } from './components/Player';
-
-
-
-// const Camera = () => {
-// 	const ref = useRef<PerspectiveCameraImpl>()
-// 	return <PerspectiveCamera ref={ref} />
-// }
+import { Grid } from './components/Grid';
 
 function App() {
 	return (
@@ -24,6 +18,7 @@ function App() {
 					<meshPhongMaterial color={'yellowgreen'} />
 				</Plane>
 				<AxisIndicator length={50} negative />
+				{/* <Grid /> */}
 			</Canvas>
 		</div>
 	);
