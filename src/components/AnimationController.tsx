@@ -7,12 +7,12 @@ import { Object3D } from 'three'
 type AnimationControllerProps = {
     modelRef: any //React.MutableRefObject<THREE.Group | undefined | null>
     animations: THREE.AnimationClip[]
+    actionName:string
 }
 
 function AnimationController(props: AnimationControllerProps) {
     const animationApi = useAnimations(props.animations, props.modelRef)
     const {actions}=animationApi
-    const selectedAction = '_bee_hover'
     const blendDuration = 0.5
     useEffect(()=>{
         animationApi.clips.forEach(i=>{
@@ -22,9 +22,9 @@ function AnimationController(props: AnimationControllerProps) {
     },[])
 
     useEffect(() => {
-        actions[selectedAction]?.reset().fadeIn(blendDuration).play()
-        return () => void actions[selectedAction]?.fadeOut(blendDuration)
-    }, [actions, selectedAction, blendDuration])
+        actions[props.actionName]?.reset().fadeIn(blendDuration).play()
+        return () => void actions[props.actionName]?.fadeOut(blendDuration)
+    }, [actions, props.actionName, blendDuration])
 
     return null
 }

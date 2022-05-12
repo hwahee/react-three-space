@@ -1,12 +1,12 @@
-import { PerspectiveCamera, Sphere, useAnimations, useGLTF } from "@react-three/drei"
+import { PerspectiveCamera, Sphere, useGLTF } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
-import React, { forwardRef, useEffect, useRef } from "react"
+import React, { forwardRef, useEffect, useRef, useState } from "react"
 import { Euler, Vector3 } from "three"
 import { KeyStat, useKeyboard } from "../useKeyboard"
 import { PerspectiveCamera as PerspectiveCameraImpl } from 'three';
 import { AnimationController } from "./AnimationController"
 
-const Model = forwardRef((props: Object, ref) => {
+const Model = forwardRef((props: {actionName:string}, ref) => {
     const glb = useGLTF('https://raw.githubusercontent.com/hwahee/myResource/master/Bee.glb')
     const innerRef = useRef<THREE.Group>(null!)
     return (
@@ -15,7 +15,7 @@ const Model = forwardRef((props: Object, ref) => {
             <group ref={innerRef}>
                 <primitive object={glb.scene} scale={[0.125, 0.125, 0.125]} />
             </group>
-            <AnimationController modelRef={innerRef} animations={glb.animations} />
+            <AnimationController modelRef={innerRef} animations={glb.animations} actionName={props.actionName}/>
         </Sphere>
     )
 })
@@ -24,6 +24,7 @@ useGLTF.preload('https://raw.githubusercontent.com/hwahee/myResource/master/Bee.
 const Player = (props: { position: number[], speed?: number }) => {
     const { position, speed = 1 } = props
     const keyStat: KeyStat = useKeyboard()
+    const [action, setAction]=useState('_bee_idle')
     const ref = useRef<THREE.Mesh>(null!)
     const modelRef = useRef<THREE.Mesh>(null!)
     const camRef = useRef<PerspectiveCameraImpl>(null!)
@@ -54,6 +55,17 @@ const Player = (props: { position: number[], speed?: number }) => {
             posnow.y + moveVec.y * delta,
             posnow.z + moveVec.z * delta]
         ref.current.position.set(posmove[0], posmove[1], posmove[2])
+
+        if(action!=='_bee_hover'){
+            if(keyStat['w']||keyStat['s']||keyStat['a']||keyStat['d']||keyStat['v']||keyStat['c']){
+                setAction('_bee_hover')
+            }
+        }
+        if(action!=='_bee_idle'){
+            if(!(keyStat['w']||keyStat['s']||keyStat['a']||keyStat['d']||keyStat['v']||keyStat['c'])){
+                setAction('_bee_idle')
+            }
+        }
     })
 
     return <>
@@ -61,7 +73,7 @@ const Player = (props: { position: number[], speed?: number }) => {
             <PerspectiveCamera ref={camRef} makeDefault position={[0, 1, -2.5]} rotation={[0, Math.PI, 0]} fov={90} />
             {/* <OrbitControls ref={ctrlRef} /> */}
             <meshBasicMaterial color={'hotpink'} transparent opacity={0} />
-            <Model ref={modelRef} />
+            <Model ref={modelRef} actionName={action} />
         </Sphere>
     </>
 }
