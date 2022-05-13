@@ -6,7 +6,7 @@ import { Plane } from '@react-three/drei'
 import { AxisIndicator } from './components/AxisIndicator';
 import { Player } from './components/Player';
 import { Grid } from './components/Grid';
-import { OtherPlayer } from './components/OtherPlayer';
+import { OtherPlayers } from './components/OtherPlayer';
 import { PlayersProvider } from './network/useSocket';
 
 function App() {
@@ -15,8 +15,8 @@ function App() {
 			<Canvas>
 				<ambientLight />
 				<PlayersProvider>
-					<Player position={[0, 1, 0]} speed={4} />
-					<OtherPlayer />
+					<Player character='butterfly' position={[0, 1, 0]} speed={4} />
+					<OtherPlayers />
 				</PlayersProvider>
 				<pointLight position={[10, 10, 10]} />
 				<Plane args={[100, 100]} rotation={[-Math.PI / 2, 0, 0]}>

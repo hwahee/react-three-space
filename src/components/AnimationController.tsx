@@ -14,12 +14,14 @@ function AnimationController(props: AnimationControllerProps) {
     const animationApi = useAnimations(props.animations, props.modelRef)
     const {actions}=animationApi
     const blendDuration = 0.5
+
     useEffect(()=>{
+        if(!props.modelRef) return
         animationApi.clips.forEach(i=>{
             animationApi.actions.i = animationApi.mixer.clipAction(i, props.modelRef)
         })
         console.log(animationApi)
-    },[])
+    },[props.modelRef])
 
     useEffect(() => {
         actions[props.actionName]?.reset().fadeIn(blendDuration).play()

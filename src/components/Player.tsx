@@ -7,31 +7,35 @@ import { PerspectiveCamera as PerspectiveCameraImpl } from 'three';
 import { AnimationController } from "./AnimationController"
 import { useSocket } from "../network/useSocket"
 import _ from "lodash"
+import { CharacterSelector } from "./Character"
+import { TCharacter } from "../types"
 
-const Model = forwardRef((props: {actionName:string}, ref) => {
-    const glb = useGLTF('https://raw.githubusercontent.com/hwahee/myResource/master/Bee.glb')
+const Model = forwardRef((props: {character:TCharacter, actionName:string}, ref) => {
+    const {character, actionName:action}=props
+    //const glb = useGLTF('https://raw.githubusercontent.com/hwahee/myResource/master/Bee.glb')
     const innerRef = useRef<THREE.Group>(null!)
     return (
         <Sphere ref={ref}>
             <meshBasicMaterial color={'hotpink'} transparent opacity={0} />
-            <group ref={innerRef}>
-                <primitive object={glb.scene} scale={[0.125, 0.125, 0.125]} />
-            </group>
-            <AnimationController modelRef={innerRef} animations={glb.animations} actionName={props.actionName}/>
+            <CharacterSelector ref={innerRef} character={character} action={action} />
         </Sphere>
     )
 })
-useGLTF.preload('https://raw.githubusercontent.com/hwahee/myResource/master/Bee.glb')
-useGLTF.preload('https://raw.githubusercontent.com/hwahee/myResource/master/butterfly.glb')
 
-const Player = (props: { position: number[], speed?: number }) => {
+const Player = (props: { character:'bee'|'butterfly',position: number[], speed?: number }) => {
     const { position, speed = 1 } = props
     const keyStat: KeyStat = useKeyboard()
-    const [action, setAction]=useState('_bee_idle')
+    const [action, setAction]=useState('idle')
     const ref = useRef<THREE.Mesh>(null!)
     const modelRef = useRef<THREE.Mesh>(null!)
     const camRef = useRef<PerspectiveCameraImpl>(null!)
     const {socket}=useSocket()
+
+    useEffect(()=>{
+        
+        if(!socket) return
+        socket.emit('initPlayer', {character:props.character})
+    },[])
 
     useEffect(() => {
         ref.current.position.set(position[0], position[1], position[2])
@@ -40,7 +44,7 @@ const Player = (props: { position: number[], speed?: number }) => {
     const emit=_.throttle((pos:Vector3, rot:Euler,action:string)=>{
         if(!socket) return
         socket.emit('update',{pos:pos, rot:{x:rot.x, y:rot.y, z:rot.z}, action:action})
-    }, 1000)
+    }, 40)
 
     useFrame((state, delta) => {
         const yewDelta = (keyStat['q'] ? 1 : 0) + (keyStat['e'] ? -1 : 0)
@@ -65,14 +69,14 @@ const Player = (props: { position: number[], speed?: number }) => {
             posnow.z + moveVec.z * delta]
         ref.current.position.set(posmove[0], posmove[1], posmove[2])
 
-        if(action!=='_bee_hover'){
+        if(action!=='move'){
             if(keyStat['w']||keyStat['s']||keyStat['a']||keyStat['d']||keyStat['v']||keyStat['c']){
-                setAction('_bee_hover')
+                setAction('move')
             }
         }
-        if(action!=='_bee_idle'){
+        if(action!=='idle'){
             if(!(keyStat['w']||keyStat['s']||keyStat['a']||keyStat['d']||keyStat['v']||keyStat['c'])){
-                setAction('_bee_idle')
+                setAction('idle')
             }
         }
         emit(ref.current.position, new Euler(modelRef.current.rotation.x, ref.current.rotation.y, 0), action)
@@ -80,10 +84,10 @@ const Player = (props: { position: number[], speed?: number }) => {
 
     return <>
         <Sphere ref={ref}>
-            <PerspectiveCamera ref={camRef} makeDefault position={[0, 1, -2.5]} rotation={[0, Math.PI, 0]} fov={90} />
+            <PerspectiveCamera ref={camRef} makeDefault position={[0, 1, -7.5]} rotation={[0, Math.PI, 0]} fov={90} />
             {/* <OrbitControls ref={ctrlRef} /> */}
             <meshBasicMaterial color={'hotpink'} transparent opacity={0} />
-            <Model ref={modelRef} actionName={action} />
+            <Model ref={modelRef} character={props.character} actionName={action} />
         </Sphere>
     </>
 }
