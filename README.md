@@ -12,5 +12,6 @@
 - [react-three-fiber](https://github.com/pmndrs/react-three-fiber)
     - react-three-drei
 - [zustand](https://github.com/pmndrs/zustand)
+- Socket.io
 
 

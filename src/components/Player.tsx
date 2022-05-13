@@ -5,6 +5,8 @@ import { Euler, Vector3 } from "three"
 import { KeyStat, useKeyboard } from "../useKeyboard"
 import { PerspectiveCamera as PerspectiveCameraImpl } from 'three';
 import { AnimationController } from "./AnimationController"
+import { useSocket } from "../network/useSocket"
+import _ from "lodash"
 
 const Model = forwardRef((props: {actionName:string}, ref) => {
     const glb = useGLTF('https://raw.githubusercontent.com/hwahee/myResource/master/Bee.glb')
@@ -20,6 +22,7 @@ const Model = forwardRef((props: {actionName:string}, ref) => {
     )
 })
 useGLTF.preload('https://raw.githubusercontent.com/hwahee/myResource/master/Bee.glb')
+useGLTF.preload('https://raw.githubusercontent.com/hwahee/myResource/master/butterfly.glb')
 
 const Player = (props: { position: number[], speed?: number }) => {
     const { position, speed = 1 } = props
@@ -28,10 +31,16 @@ const Player = (props: { position: number[], speed?: number }) => {
     const ref = useRef<THREE.Mesh>(null!)
     const modelRef = useRef<THREE.Mesh>(null!)
     const camRef = useRef<PerspectiveCameraImpl>(null!)
+    const {socket}=useSocket()
 
     useEffect(() => {
         ref.current.position.set(position[0], position[1], position[2])
     }, [ref.current])
+
+    const emit=_.throttle((pos:Vector3, rot:Euler,action:string)=>{
+        if(!socket) return
+        socket.emit('update',{pos:pos, rot:{x:rot.x, y:rot.y, z:rot.z}, action:action})
+    }, 1000)
 
     useFrame((state, delta) => {
         const yewDelta = (keyStat['q'] ? 1 : 0) + (keyStat['e'] ? -1 : 0)
@@ -66,6 +75,7 @@ const Player = (props: { position: number[], speed?: number }) => {
                 setAction('_bee_idle')
             }
         }
+        emit(ref.current.position, new Euler(modelRef.current.rotation.x, ref.current.rotation.y, 0), action)
     })
 
     return <>
